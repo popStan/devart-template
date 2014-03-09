@@ -1,11 +1,14 @@
 {
     "technologies": {
+
+        "languages": [
+            "java"
+        ]
+
         "platforms": [
             "android"
-        ],
-		"languages": [
-			"java"
-		]
+        ]
+
     },
 	"themes": [
 		"Fun",

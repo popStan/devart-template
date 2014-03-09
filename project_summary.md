@@ -3,7 +3,7 @@ Blow Your Air
 
 ## Authors
 - Shuang Zhao  [https://github.com/popStan](https://github.com/popStan)
-- Yidong Qi
+- Yidong Ji
 
 ## Description
 More and more people pay attention to air quality nowadays. And there are so

@@ -4,6 +4,10 @@
         "languages": [
             "java"
         ],
+        
+         "apis": [
+            "maps"
+        ],
 
         "platforms": [
             "android"

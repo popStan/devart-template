@@ -1,16 +1,14 @@
 {
     "technologies": {
-        "apis": [
-            "insert apis"
-        ],
         "platforms": [
-            "insert platforms"
+            "android"
         ],
-        "toolkits": [
-            "insert toolkits"
-        ]
+		"languages": [
+			"java"
+		]
     },
-    "themes": [
-        "insert themes"
+	"themes": [
+		"Fun",
+		"Environment"
     ]
 }

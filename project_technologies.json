@@ -1,20 +1,16 @@
 {
     "technologies": {
-
         "languages": [
             "java"
         ],
-        
-         "apis": [
+        "apis": [
             "maps"
         ],
-
         "platforms": [
-            "android"
+            "android",
         ]
-
     },
-	"themes": [
+    "themes": [
 		"Fun",
 		"Environment"
     ]

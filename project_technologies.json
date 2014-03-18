@@ -12,7 +12,12 @@
 
         "platforms": [
             "android",
-        ]
+        ],
+
+		"toolkits": [
+	       "insert toolkits"
+		]
+						        ]
     },
     "themes": [
 		"Fun",

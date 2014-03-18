@@ -18,12 +18,12 @@ public class BlowYourAir extends Activity {
 	private static final String TAG = "BlowYourAir";
 
 	private Button bt1;
-//	private Button bt2;
-//	private Button bt3;
-//	private Button bt4;
+	// private Button bt2;
+	// private Button bt3;
+	// private Button bt4;
 	private TextView text1;
 	private TextView text2;
-//	private TextView text3;
+	// private TextView text3;
 	private String mCity = null;
 	private PM25GetAqi.PM25 mPM25 = null;
 	static int blow_count = 0;
@@ -32,12 +32,22 @@ public class BlowYourAir extends Activity {
 	public static final int START_RECORD = 1;
 	public static final int STOP_RECORD = 2;
 	public static final int GET_CITY_OK = 3;
-	
-	
 
 	private void checkAccessLocation() {
 		Log.d(TAG, "Check Accessibility");
 		new PM25GetCity(this).checkLocationService();
+	}
+
+	private void clearVar(String state) {
+		mPM25 = null;
+		mCity = null;
+		blow_count = 0;
+		text2.setText("PM2.5: ");
+		if (state.equals("start")) 	{
+			text1.setText("Your Breathing:");
+		} else if (state.equals("stop")) {
+			text1.setText("No input.");
+		}
 	}
 
 	private void getCity() {
@@ -54,7 +64,7 @@ public class BlowYourAir extends Activity {
 				}
 				mCity = city;
 				myHandler.sendMessage(myHandler.obtainMessage(GET_CITY_OK));
-//				text1.setText("City:" + city);
+				// text1.setText("City:" + city);
 				Log.d(TAG, "geo coder get city name:" + city);
 			}
 		});
@@ -80,11 +90,11 @@ public class BlowYourAir extends Activity {
 				// TODO Auto-generated method stub
 				if (pm25.aqi == null) {
 					Log.d(TAG, "Get PM25 error...");
-//					text2.setText("PM25:null");
+					// text2.setText("PM25:null");
 					return;
 				}
 				mPM25 = pm25;
-//				text2.setText("PM25:" + mPM25.aqi);
+				// text2.setText("PM25:" + mPM25.aqi);
 			}
 		}, mCity);
 
@@ -94,7 +104,6 @@ public class BlowYourAir extends Activity {
 
 	}
 
-	
 	byte[] buffer = new byte[100];
 	MyHandler myHandler = new MyHandler() {
 		@Override
@@ -118,7 +127,7 @@ public class BlowYourAir extends Activity {
 					text2.setText("PM25: Fetch data error");
 				}
 				break;
-				
+
 			case GET_CITY_OK:
 				getPM25();
 				break;
@@ -143,17 +152,17 @@ public class BlowYourAir extends Activity {
 		checkAccessLocation();
 
 		bt1 = (Button) findViewById(R.id.bt1);
-//		bt2 = (Button) findViewById(R.id.bt2);
-//		bt3 = (Button) findViewById(R.id.bt3);
-//		bt4 = (Button) findViewById(R.id.bt4);
+		// bt2 = (Button) findViewById(R.id.bt2);
+		// bt3 = (Button) findViewById(R.id.bt3);
+		// bt4 = (Button) findViewById(R.id.bt4);
 		BtListener btlistener = new BtListener();
 		text1 = (TextView) findViewById(R.id.text1);
 		text2 = (TextView) findViewById(R.id.text2);
-//		text3 = (TextView) findViewById(R.id.text3);
+		// text3 = (TextView) findViewById(R.id.text3);
 		bt1.setOnClickListener(btlistener);
-//		bt2.setOnClickListener(btlistener);
-//		bt3.setOnClickListener(btlistener);
-//		bt4.setOnClickListener(btlistener);
+		// bt2.setOnClickListener(btlistener);
+		// bt3.setOnClickListener(btlistener);
+		// bt4.setOnClickListener(btlistener);
 
 	}
 
@@ -167,38 +176,39 @@ public class BlowYourAir extends Activity {
 			case R.id.bt1:
 				Log.d(TAG, "on click bt1");
 				getCity();
-				getPM25();
+//				getPM25();
 				if (recordThread == null) {
 					recordThread = new RecordThread(myHandler);
 				}
+				clearVar("start");
 				bt1.setText("Recording...");
 				recordThread.prepare();
 				myHandler.removeMessages(START_RECORD);
 				myHandler.sendMessage(myHandler.obtainMessage(START_RECORD));
 				break;
-//			case R.id.bt2:
-//				Log.d(TAG, "on click bt2");
-//				getPM25();
-//				break;
-//			case R.id.bt3:
-//				Log.d(TAG, "on click bt3");
-//				if (recordThread == null) {
-//					recordThread = new RecordThread(myHandler);
-//				}
-//				bt3.setText("Recording...");
-//				recordThread.prepare();
-//				myHandler.removeMessages(START_RECORD);
-//				myHandler.sendMessage(myHandler.obtainMessage(START_RECORD));
-//				break;
-//
-//			case R.id.bt4:
-//				Log.d(TAG, "on click b4");
-//				Log.d(TAG, "Sto record....");
-//				myHandler.removeMessages(START_RECORD);
-//				if (recordThread != null) {
-//					recordThread.stop();
-//				}
-//				break;
+			// case R.id.bt2:
+			// Log.d(TAG, "on click bt2");
+			// getPM25();
+			// break;
+			// case R.id.bt3:
+			// Log.d(TAG, "on click bt3");
+			// if (recordThread == null) {
+			// recordThread = new RecordThread(myHandler);
+			// }
+			// bt3.setText("Recording...");
+			// recordThread.prepare();
+			// myHandler.removeMessages(START_RECORD);
+			// myHandler.sendMessage(myHandler.obtainMessage(START_RECORD));
+			// break;
+			//
+			// case R.id.bt4:
+			// Log.d(TAG, "on click b4");
+			// Log.d(TAG, "Sto record....");
+			// myHandler.removeMessages(START_RECORD);
+			// if (recordThread != null) {
+			// recordThread.stop();
+			// }
+			// break;
 			default:
 				break;
 			}
@@ -214,6 +224,7 @@ public class BlowYourAir extends Activity {
 		if (recordThread != null) {
 			recordThread.stop();
 		}
+		clearVar("stop");
 	}
 
 	/**

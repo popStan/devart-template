@@ -21,7 +21,7 @@ public class RecordThread {
 	private long endtime;
 	private long time = 1;
 	private byte[] buffer;
-	private static int Last_count = 100;
+	private static int Last_count = 50;
 	private static boolean is_blowing = false;
 
 	// 到达该值之后 触发事件
@@ -76,7 +76,7 @@ public class RecordThread {
 			Last_count -= 1;
 			if (Last_count <= 0) {
 				is_blowing = false;
-				Last_count = 100;
+				Last_count = 50;
 				handler.sendEmptyMessage(BlowYourAir.STOP_RECORD);
 				Log.d(TAG, "Blowing stops.");
 			}

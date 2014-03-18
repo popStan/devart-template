@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg1"
     tools:context=".BlowYourAir" >
 
     <LinearLayout
@@ -22,8 +23,7 @@
             android:text="No input"
             android:textSize="30sp"
             android:typeface="monospace" />
-        
-        
+
         <TextView
             android:id="@+id/text2"
             android:layout_width="match_parent"

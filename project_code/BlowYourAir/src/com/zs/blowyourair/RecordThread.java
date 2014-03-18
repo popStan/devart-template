@@ -5,12 +5,11 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.zs.blowyourair.BolwYourAir.MyHandler;
+import com.zs.blowyourair.BlowYourAir.MyHandler;
 
 public class RecordThread {
 
 	private static final String TAG = "BlowYourAir";
-	public static final int UPDATE_UI = 1;
 	private AudioRecord ar;
 	private int bs = 100;
 	private static int SAMPLE_RATE_IN_HZ = 8000;
@@ -22,6 +21,8 @@ public class RecordThread {
 	private long endtime;
 	private long time = 1;
 	private byte[] buffer;
+	private static int Last_count = 100;
+	private static boolean is_blowing = false;
 
 	// 到达该值之后 触发事件
 	private static int BLOW_ACTIVI = 2700;
@@ -39,7 +40,7 @@ public class RecordThread {
 	}
 
 	public void run() {
-		Log.d(TAG, "[run]start recording....");
+//		Log.d(TAG, "[run]start recording....");
 		number++;
 		currenttime = System.currentTimeMillis();
 		int r = ar.read(buffer, 0, bs) + 1;
@@ -55,16 +56,29 @@ public class RecordThread {
 		if (time >= 300 || number > 5) {
 
 			int total = tal / number;
-//			Log.d(TAG, "[run]tal:" + tal + " number:" + number + " total:"
-//					+ total + " r:" + r + " v:" + v);
+			// Log.d(TAG, "[run]tal:" + tal + " number:" + number + " total:"
+			// + total + " r:" + r + " v:" + v);
 			if (total > BLOW_ACTIVI) {
 
 				// 利用传入的handler 给界面发送通知
-				BolwYourAir.blow_count += 1;
-				handler.sendEmptyMessage(UPDATE_UI);
+				BlowYourAir.blow_count += 1;
+				Last_count += 4;
+				Log.d(TAG, "In Blowing, last_count:" + Last_count);
+				is_blowing = true;
+				handler.sendEmptyMessage(BlowYourAir.UPDATE_UI);
 				number = 1;
 				tal = 1;
 				time = 1;
+			}
+		}
+
+		if (is_blowing) {
+			Last_count -= 1;
+			if (Last_count <= 0) {
+				is_blowing = false;
+				Last_count = 100;
+				handler.sendEmptyMessage(BlowYourAir.STOP_RECORD);
+				Log.d(TAG, "Blowing stops.");
 			}
 		}
 	}

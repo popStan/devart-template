@@ -1,11 +1,6 @@
 
 {
     "technologies": {
-
-        "languages": [
-            "java"
-        ],
-
         "apis": [
             "maps"
         ],

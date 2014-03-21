@@ -1,14 +1,19 @@
+
 {
     "technologies": {
+
         "languages": [
             "java"
         ],
+
         "apis": [
             "maps"
         ],
+
         "platforms": [
             "android"
         ]
+						        ]
     },
     "themes": [
 		"Fun",

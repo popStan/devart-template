@@ -1,6 +1,8 @@
 package com.zs.blowyourair;
 
 import android.app.Activity;
+import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,12 +28,15 @@ public class BlowYourAir extends Activity {
 	// private TextView text3;
 	private String mCity = null;
 	private PM25GetAqi.PM25 mPM25 = null;
+	private Context mContext = null;
 	static int blow_count = 0;
 	RecordThread recordThread = null;
 	public static final int UPDATE_UI = 0;
 	public static final int START_RECORD = 1;
 	public static final int STOP_RECORD = 2;
-	public static final int GET_CITY_OK = 3;
+	public static final int GET_CITY = 3;
+	public static final int GET_PM25 = 4;
+	private PM25GetCity mPM25GetCity;
 
 	private void checkAccessLocation() {
 		Log.d(TAG, "Check Accessibility");
@@ -43,11 +48,15 @@ public class BlowYourAir extends Activity {
 		mCity = null;
 		blow_count = 0;
 		text2.setText("PM2.5: ");
-		if (state.equals("start")) 	{
+		if (state.equals("start")) {
 			text1.setText("Your Breathing:");
 		} else if (state.equals("stop")) {
 			text1.setText("No input.");
 		}
+	}
+
+	public void onLocationChanged() {
+		myHandler.sendMessage(myHandler.obtainMessage(GET_CITY));
 	}
 
 	private void getCity() {
@@ -56,19 +65,20 @@ public class BlowYourAir extends Activity {
 			return;
 		}
 		Log.d(TAG, "about to getcity....");
-		new PM25GetCity(this).requestCityName(new PM25GetCity.CityNameStatus() {
+
+		mPM25GetCity.requestCityName(new PM25GetCity.CityNameStatus() {
 			public void update(String city) {
 				if (city == null) {// 未定位到城市
 					Log.d(TAG, "Get city name error");
 					return;
 				}
 				mCity = city;
-				myHandler.sendMessage(myHandler.obtainMessage(GET_CITY_OK));
+				myHandler.sendMessage(myHandler.obtainMessage(GET_PM25));
 				// text1.setText("City:" + city);
 				Log.d(TAG, "geo coder get city name:" + city);
+				return;
 			}
 		});
-
 	}
 
 	private void getPM25() {
@@ -94,7 +104,7 @@ public class BlowYourAir extends Activity {
 					return;
 				}
 				mPM25 = pm25;
-				// text2.setText("PM25:" + mPM25.aqi);
+//				 text2.setText("PM25:" + mPM25.aqi);
 			}
 		}, mCity);
 
@@ -127,8 +137,10 @@ public class BlowYourAir extends Activity {
 					text2.setText("PM25: Fetch data error");
 				}
 				break;
-
-			case GET_CITY_OK:
+			case GET_CITY:
+				getCity();
+				break;
+			case GET_PM25:
 				getPM25();
 				break;
 			case UPDATE_UI:
@@ -150,6 +162,7 @@ public class BlowYourAir extends Activity {
 		setContentView(R.layout.activity_blow_your_air);
 
 		checkAccessLocation();
+		mContext = this;
 
 		bt1 = (Button) findViewById(R.id.bt1);
 		// bt2 = (Button) findViewById(R.id.bt2);
@@ -164,6 +177,9 @@ public class BlowYourAir extends Activity {
 		// bt3.setOnClickListener(btlistener);
 		// bt4.setOnClickListener(btlistener);
 
+		mPM25GetCity = PM25GetCity.getInstance(this);
+		getCity();
+
 	}
 
 	class BtListener implements OnClickListener {
@@ -176,7 +192,11 @@ public class BlowYourAir extends Activity {
 			case R.id.bt1:
 				Log.d(TAG, "on click bt1");
 				getCity();
-//				getPM25();
+//				if (mCity == null) {
+//					Toast.makeText(mContext, "Locating failed...",
+//							Toast.LENGTH_SHORT).show();
+//					break;
+//				}
 				if (recordThread == null) {
 					recordThread = new RecordThread(myHandler);
 				}
@@ -225,7 +245,24 @@ public class BlowYourAir extends Activity {
 			recordThread.stop();
 		}
 		clearVar("stop");
+		if (mPM25GetCity != null) {
+			mPM25GetCity.unregistListener();
+			mPM25GetCity = null;
+		}
 	}
+	
+	
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		if (mPM25GetCity == null) {
+			mPM25GetCity = PM25GetCity.getInstance(this);
+		}
+	}
+
+
 
 	/**
 	 * 连续按两次返回键就退出

@@ -4,6 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.zs.blowyourair.BlowYourAir.MyHandler;
+
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -17,6 +19,9 @@ public class PM25GetCity {
 	private static final String TAG = "BlowYourAir";
 	private Location lastKnownLocation;
 	private Context mContext;
+	private boolean isGPSRegist = false;
+	private boolean isNWRegist = false;
+	private static PM25GetCity instance = null;
 	private LocationListener mListener = new LocationListener() {
 
 		@Override
@@ -44,7 +49,8 @@ public class PM25GetCity {
 		public void onLocationChanged(Location location) {
 			// TODO Auto-generated method stub
 			Log.d(TAG, "onLocationChanged, location=" + location.toString());
-
+			lastKnownLocation = location;
+			new BlowYourAir().onLocationChanged();
 		}
 	};
 	private LocationManager mLocationManager;
@@ -56,30 +62,35 @@ public class PM25GetCity {
 				.getSystemService(Context.LOCATION_SERVICE);
 	}
 
+	public static PM25GetCity getInstance(Context context) {
+		if (instance == null) {
+			instance = new PM25GetCity(context);
+		}
+		return instance;
+	}
+
 	private void getLastKnownLocation() {
 
-		Location passive = this.mLocationManager
-				.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
 		Location network = this.mLocationManager
 				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		Location gps = this.mLocationManager
 				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-		if (passive != null) {
-			this.lastKnownLocation = passive;
-			Log.d(TAG, "passive last location newer than " + lastKnownLocation);
-		}
 		if ((network != null)) {
-			if (passive == null || (passive.getTime() <= network.getTime())) {
-				this.lastKnownLocation = network;
-				Log.d(TAG, "network last location newer than "
-						+ lastKnownLocation);
+			this.lastKnownLocation = network;
+			Log.d(TAG, "network last location newer than " + lastKnownLocation);
+			if (isNWRegist) {
+				this.mLocationManager.removeUpdates(mListener);
 			}
+
 		}
 		if ((gps != null)) {
 			if ((network == null) || (network.getTime() <= gps.getTime())) {
 				this.lastKnownLocation = gps;
 				Log.d(TAG, "gps last location newer than " + lastKnownLocation);
+			}
+			if (isGPSRegist) {
+				this.mLocationManager.removeUpdates(mListener);
 			}
 		}
 	}
@@ -99,6 +110,12 @@ public class PM25GetCity {
 					Toast.LENGTH_SHORT).show();
 	}
 
+	public void unregistListener() {
+			mLocationManager.removeUpdates(mListener);
+			isGPSRegist = false;
+			isNWRegist = false;
+	}
+	
 	public void requestCityName(final CityNameStatus cityNameStatus) {
 		Log.d(TAG, "getLastKnownLocation...");
 		getLastKnownLocation();
@@ -151,32 +168,35 @@ public class PM25GetCity {
 		} else {
 			Log.d(TAG, "LastKnownLocation == null...");
 
-			if (this.mLocationManager
-					.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
-				Log.d(TAG, "PASSIVE Enabled!");
-				this.mLocationManager.requestLocationUpdates(
-						LocationManager.PASSIVE_PROVIDER, 1000L, 10.0F,
-						this.mListener);
-			}
-			if (this.mLocationManager
-					.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-				Log.d(TAG, "NETWORK Enabled!");
-				this.mLocationManager.requestLocationUpdates(
-						LocationManager.NETWORK_PROVIDER, 1000L, 10.0F,
-						this.mListener);
-			}
-			if (this.mLocationManager
-					.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-				Log.d(TAG, "GPS Enabled!");
-				this.mLocationManager.requestLocationUpdates(
-						LocationManager.GPS_PROVIDER, 1000L, 10.0F,
-						this.mListener);
+			if (!isNWRegist) {
+				if (this.mLocationManager
+						.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+					Log.d(TAG, "NETWORK Enabled!");
+					this.mLocationManager.requestLocationUpdates(
+							LocationManager.NETWORK_PROVIDER, 5000, 0,
+							this.mListener);
+					Log.d(TAG, "requestLocationUpdates by NETWORK.");
+					isNWRegist = true;
+				}
 			} else {
-				Log.d(TAG, "No one Enabled!");
+				Log.d(TAG, "already registed NETWORK.");
+			}
+			if (!isGPSRegist) {
+				if (this.mLocationManager
+						.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+					Log.d(TAG, "GPS Enabled!");
+					this.mLocationManager.requestLocationUpdates(
+							LocationManager.GPS_PROVIDER, 5000, 0,
+							this.mListener);
+					Log.d(TAG, "requestLocationUpdates by GPS.");
+					isGPSRegist = true;
+				}
+			} else {
+				Log.d(TAG, "already registed GPS.");
 			}
 
 			Log.d(TAG, mLocationManager.getProviders(true).toString());
-			Log.d(TAG, "requestLocationUpdates...");
+			cityNameStatus.update(null);
 		}
 
 	}
